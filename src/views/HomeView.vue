@@ -36,7 +36,7 @@ export default class HomeView extends Vue {
 <style scoped>
 .home {
   position: relative;
-  background: #f00;
+  background: #eee;
   touch-action: none;
 }
 .home > * {

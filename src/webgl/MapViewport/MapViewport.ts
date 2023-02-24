@@ -1,6 +1,7 @@
 import WebGLDebugUtils from '../webgl-debug.js'
 import Viewport from '../Viewport'
 import TileLayer from './Layers/TileLayer'
+import MarkerLayer from './Layers/MarkerLayer'
 
 export default class MapViewport extends Viewport {
   dragData?: {
@@ -21,9 +22,9 @@ export default class MapViewport extends Viewport {
     console.log(canvas, canvas.width, canvas.height)
     // const gl = WebGLDebugUtils.makeDebugContext(canvas.getContext('webgl'))
     const gl = canvas.getContext('webgl', {
-      desynchronized: true,
+      // desynchronized: true,
       antialias: true,
-      powerPreference: 'high-performance',
+      // powerPreference: 'high-performance',
     })
     if (!gl) {
       throw new Error('Context webgl not created')
@@ -35,6 +36,7 @@ export default class MapViewport extends Viewport {
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
 
     this.layers.push(new TileLayer(gl))
+    this.layers.push(new MarkerLayer(gl))
     for (const layer of this.layers) {
       layer.init()
     }
@@ -72,6 +74,7 @@ export default class MapViewport extends Viewport {
     for (const layer of this.layers) {
       layer.render()
     }
+    gl.finish()
   }
 
   wheel (event: WheelEvent) {
