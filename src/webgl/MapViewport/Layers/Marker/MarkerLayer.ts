@@ -1,8 +1,8 @@
-import Layer from '../../Layer'
+import Layer from '@/webgl/Layer'
 import vsSource from './marker.vs'
 import fsSource from './marker.fs'
 import MarkerElement from './MarkerElement'
-import matrix from '../../matrix'
+import matrix from '@/webgl/matrix'
 
 export default class MarkerLayer extends Layer {
   program?: WebGLProgram
@@ -57,13 +57,18 @@ export default class MarkerLayer extends Layer {
     if (!vertexBuffer) {
       throw new Error('Fail create buffer')
     }
+
+    const vertices = []
+    const totalPoints = 100
+    for (let i = 0; i <= totalPoints; i++) {
+      const angle = 2 * Math.PI * i / totalPoints
+      const x = Math.cos(angle)
+      const y = Math.sin(angle)
+      vertices.push(x)
+      vertices.push(y / 2)
+    }
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer)
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-      0, 0,
-      0, 1 / 2,
-      1, 0,
-      1, 1 / 2,
-    ]), gl.STATIC_DRAW)
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
     this.vertexBuffer = vertexBuffer
 
     for (let x = 0; x < 256 * 8; x++) {
@@ -97,8 +102,8 @@ export default class MarkerLayer extends Layer {
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer)
     gl.vertexAttribPointer(this.attribLocations.vertex, 2, gl.FLOAT, false, 0, 0)
 
-    for (const tileElement of this.elements) {
-      tileElement.render()
+    for (const element of this.elements) {
+      element.render()
     }
   }
 }

@@ -43,8 +43,8 @@ export default abstract class Layer {
   }
 
   setPos (x: number, y: number, z: number) {
-    this.x = x
-    this.y = y
+    this.x = (x / this.gl.canvas.width) * 360
+    this.y = (y / this.gl.canvas.height) * 180
     this.z = z
   }
 

@@ -1,8 +1,8 @@
-import Layer from '../../Layer'
+import Layer from '@/webgl/Layer'
 import vsSource from './tile.vs'
 import fsSource from './tile.fs'
 import TileElement from './TileElement'
-import matrix from '../../matrix'
+import matrix from '@/webgl/matrix'
 
 export default class TileLayer extends Layer {
   program?: WebGLProgram
@@ -21,7 +21,7 @@ export default class TileLayer extends Layer {
 
   tileSize = 256
 
-  tileZ = 5
+  tileZ = 4
   urlBuilder = (x: number, y: number, z: number): string => `https://tile.openstreetmap.org/${z}/${x}/${y}.png`
 
   // 1 2x2

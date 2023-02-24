@@ -1,4 +1,4 @@
-import Element from '../../Element'
+import Element from '@/webgl/Element'
 import TileLayer from './TileLayer'
 
 export default class TileElement extends Element {

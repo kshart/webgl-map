@@ -1,7 +1,7 @@
 import WebGLDebugUtils from '../webgl-debug.js'
 import Viewport from '../Viewport'
 import TileLayer from './Layers/TileLayer'
-import MarkerLayer from './Layers/MarkerLayer'
+import MarkerLayer from './Layers/Marker/MarkerLayer'
 
 export default class MapViewport extends Viewport {
   dragData?: {
@@ -74,7 +74,7 @@ export default class MapViewport extends Viewport {
     for (const layer of this.layers) {
       layer.render()
     }
-    gl.finish()
+    // gl.finish()
   }
 
   wheel (event: WheelEvent) {
@@ -136,6 +136,7 @@ export default class MapViewport extends Viewport {
     this.x = this.x + this.dragData.x
     this.y = this.y + this.dragData.y
     this.dragData = undefined
+    console.log(this.x, this.y)
   }
 
   drag (x: number, y: number) {

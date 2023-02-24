@@ -1,4 +1,4 @@
-import Element from '../../Element'
+import Element from '@/webgl/Element'
 import MarkerLayer from './MarkerLayer'
 
 export default class MarkerElement extends Element {
@@ -17,6 +17,6 @@ export default class MarkerElement extends Element {
     }
     const gl = this.layer.gl
     gl.uniform2f(this.layer.uniformLocations.offsetMarker, this.x, this.y)
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, 100 * 2)
   }
 }
