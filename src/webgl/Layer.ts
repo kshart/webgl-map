@@ -1,15 +1,16 @@
 import Element from './Element'
+import Viewport from './Viewport'
 
 export default abstract class Layer {
-  gl: WebGLRenderingContext
+  viewport: Viewport
   elements: Element[]
 
   x = 0
   y = 0
   z = 0
 
-  constructor (gl: WebGLRenderingContext) {
-    this.gl = gl
+  constructor (viewport: Viewport) {
+    this.viewport = viewport
     this.elements = []
   }
 
@@ -20,7 +21,7 @@ export default abstract class Layer {
   }
 
   loadShader (type: number, source: string): WebGLShader {
-    const gl = this.gl
+    const gl = this.viewport.gl
     const shader = gl.createShader(type)
     if (!shader) {
       throw new Error('Fail create shader')
@@ -43,10 +44,11 @@ export default abstract class Layer {
   }
 
   setPos (x: number, y: number, z: number) {
-    this.x = (x / this.gl.canvas.width) * 360
-    this.y = (y / this.gl.canvas.height) * 180
+    this.x = x
+    this.y = y
     this.z = z
   }
 
   abstract init (): void
+  abstract updateView (): void
 }

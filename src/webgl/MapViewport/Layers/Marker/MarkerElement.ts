@@ -12,11 +12,11 @@ export default class MarkerElement extends Element {
   }
 
   render (): void {
-    if (!this.layer.uniformLocations) {
+    if (!this.layer.uniforms) {
       throw new Error('Fatal Error')
     }
-    const gl = this.layer.gl
-    gl.uniform2f(this.layer.uniformLocations.offsetMarker, this.x, this.y)
-    gl.drawArrays(gl.TRIANGLE_FAN, 0, 100 * 2)
+    const gl = this.layer.viewport.gl
+    gl.uniform2f(this.layer.uniforms.offsetMarker, this.x, this.y)
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, 100)
   }
 }

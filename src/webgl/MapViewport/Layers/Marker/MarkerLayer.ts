@@ -7,27 +7,29 @@ import matrix from '@/webgl/matrix'
 export default class MarkerLayer extends Layer {
   program?: WebGLProgram
 
-  attribLocations?: {
+  attribs?: {
     vertex: number
   }
 
-  uniformLocations?: {
+  uniforms?: {
     [index: string]: WebGLUniformLocation | null
   }
 
-  vertexBuffer?: WebGLBuffer
+  buffers = {
+    vertex: null as WebGLBuffer | null
+  }
 
   init (): void {
-    const gl = this.gl
+    const gl = this.viewport.gl
     const program = gl.createProgram()
     if (!program) {
       throw new Error('Unable to initialize the shader program.')
     }
     this.program = program
-    this.attribLocations = {
+    this.attribs = {
       vertex: -1
     }
-    this.uniformLocations = {
+    this.uniforms = {
       offsetMarker: null,
       layerMatrix: null,
       viewMatrix: null,
@@ -42,16 +44,14 @@ export default class MarkerLayer extends Layer {
 
     gl.useProgram(this.program)
 
-    this.attribLocations.vertex = gl.getAttribLocation(this.program, 'aVertexPosition')
-    for (const name in this.uniformLocations) {
-      this.uniformLocations[name] = gl.getUniformLocation(this.program, name)
+    this.attribs.vertex = gl.getAttribLocation(this.program, 'aVertexPosition')
+    for (const name in this.uniforms) {
+      this.uniforms[name] = gl.getUniformLocation(this.program, name)
     }
 
-    gl.uniform1f(this.uniformLocations.opacity, 0.0)
-    console.log(gl.canvas.width, gl.canvas.height)
-    gl.uniformMatrix4fv(this.uniformLocations.viewMatrix, false, matrix.perspective(180, -180, -90, 90, -10, 10))
+    gl.uniform1f(this.uniforms.opacity, 0.0)
 
-    gl.enableVertexAttribArray(this.attribLocations.vertex)
+    gl.enableVertexAttribArray(this.attribs.vertex)
     console.log(this)
     const vertexBuffer = gl.createBuffer()
     if (!vertexBuffer) {
@@ -69,38 +69,38 @@ export default class MarkerLayer extends Layer {
     }
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer)
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
-    this.vertexBuffer = vertexBuffer
+    this.buffers.vertex = vertexBuffer
 
+    const elements = []
     for (let x = 0; x < 256 * 8; x++) {
-      this.addElements([
-        new MarkerElement(this, Math.random() * 360 - 180, Math.random() * 180 - 90),
-      ])
+      elements.push(new MarkerElement(this, Math.random() * 360 - 180, Math.random() * 180 - 90))
     }
-    // this.addElements([ww
-    //   new TileElement(this, 'https://tile.openstreetmap.org/9/334/160.png', 0, 0),
-    //   new TileElement(this, 'https://tile.openstreetmap.org/9/335/160.png', this.tileSize, 0),
-    //   new TileElement(this, 'https://tile.openstreetmap.org/9/334/161.png', 0, this.tileSize),
-    //   new TileElement(this, 'https://tile.openstreetmap.org/9/335/161.png', this.tileSize, this.tileSize),
-    // ])
+    this.addElements(elements)
+  }
+
+  updateView (): void {
+    if (!this.program || !this.uniforms) {
+      throw new Error('Fatal Error')
+    }
+    const gl = this.viewport.gl
+    gl.useProgram(this.program)
+    gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, matrix.perspective(this.viewport.viewRight, this.viewport.viewLeft, this.viewport.viewTop, this.viewport.viewBottom, -10, 10))
   }
 
   render (): void {
-    if (!this.program || !this.uniformLocations || !this.attribLocations || !this.vertexBuffer) {
+    if (!this.program || !this.uniforms || !this.attribs || !this.buffers.vertex) {
       throw new Error('Fatal Error')
     }
-    const gl = this.gl
+    const gl = this.viewport.gl
     gl.useProgram(this.program)
-    // this.x = 0.5
-    // this.y = 0.5
-    gl.uniformMatrix4fv(this.uniformLocations.layerMatrix, false, new Float32Array([
+    gl.uniformMatrix4fv(this.uniforms.layerMatrix, false, new Float32Array([
       1.0, 0.0, 0.0, 0.0,
       0.0, 1.0, 0.0, 0.0,
       0.0, 0.0, 1.0, 0.0,
       this.x, this.y, this.z + 1, 1.0
     ]))
-    // console.log(this.x, this.y, this.z)
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer)
-    gl.vertexAttribPointer(this.attribLocations.vertex, 2, gl.FLOAT, false, 0, 0)
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.vertex)
+    gl.vertexAttribPointer(this.attribs.vertex, 2, gl.FLOAT, false, 0, 0)
 
     for (const element of this.elements) {
       element.render()

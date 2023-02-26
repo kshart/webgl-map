@@ -12,7 +12,7 @@ export default class TileLayer extends Layer {
     vertex: number
   }
 
-  uniformLocations?: {
+  uniforms?: {
     [index: string]: WebGLUniformLocation | null
   }
 
@@ -21,7 +21,7 @@ export default class TileLayer extends Layer {
 
   tileSize = 256
 
-  tileZ = 4
+  tileZ = 3
   urlBuilder = (x: number, y: number, z: number): string => `https://tile.openstreetmap.org/${z}/${x}/${y}.png`
 
   // 1 2x2
@@ -30,7 +30,7 @@ export default class TileLayer extends Layer {
   // y -90 : 90
 
   init (): void {
-    const gl = this.gl
+    const gl = this.viewport.gl
     const program = gl.createProgram()
     if (!program) {
       throw new Error('Unable to initialize the shader program.')
@@ -40,7 +40,7 @@ export default class TileLayer extends Layer {
       textureCoords: -1,
       vertex: -1
     }
-    this.uniformLocations = {
+    this.uniforms = {
       offsetTile: null,
       layerMatrix: null,
       opacity: null,
@@ -59,19 +59,11 @@ export default class TileLayer extends Layer {
 
     this.attribLocations.textureCoords = gl.getAttribLocation(this.program, 'aVertexTextureCoords')
     this.attribLocations.vertex = gl.getAttribLocation(this.program, 'aVertexPosition')
-    for (const name in this.uniformLocations) {
-      this.uniformLocations[name] = gl.getUniformLocation(this.program, name)
+    for (const name in this.uniforms) {
+      this.uniforms[name] = gl.getUniformLocation(this.program, name)
     }
 
-    gl.uniform1f(this.uniformLocations.opacity, 0.0)
-    console.log(gl.canvas.width, gl.canvas.height)
-    // gl.uniformMatrix4fv(this.uniformLocations.viewMatrix, false, matrix.orthographic(0, gl.canvas.width, gl.canvas.height, 0, -10, 10))
-    // gl.uniformMatrix4fv(this.uniformLocations.viewMatrix, false, matrix.perspective(2, 1, -100, 100))
-    // gl.uniformMatrix4fv(this.uniformLocations.viewMatrix, false, matrix.perspective(0, gl.canvas.width, gl.canvas.height, 0, -10, 10))
-    // gl.uniformMatrix4fv(this.uniformLocations.viewMatrix, false, matrix.perspective(0, 1000, 1000, 0, -10, 10))
-    // gl.uniformMatrix4fv(this.uniformLocations.viewMatrix, false, matrix.perspective(0, 1000, 1000, 0, -10, 10))
-    gl.uniformMatrix4fv(this.uniformLocations.viewMatrix, false, matrix.perspective(180, -180, -90, 90, -10, 10))
-    // gl.uniformMatrix4fv(this.uniformLocations.viewMatrix, false, matrix.perspective(-90 / 1.5, 90 / 1.5, 45 / 1.5, -45 / 1.5, 1, 10))
+    gl.uniform1f(this.uniforms.opacity, 0.0)
 
     const tileCount = 2 ** this.tileZ
 
@@ -92,10 +84,10 @@ export default class TileLayer extends Layer {
     ]), gl.STATIC_DRAW)
     gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordsBuffer)
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-      0, 1,
       0, 0,
-      1, 1,
+      0, 1,
       1, 0,
+      1, 1,
     ]), gl.STATIC_DRAW)
     this.vertexBuffer = vertexBuffer
     this.textureCoordsBuffer = textureCoordsBuffer
@@ -115,15 +107,31 @@ export default class TileLayer extends Layer {
     // ])
   }
 
-  render (): void {
-    if (!this.program || !this.uniformLocations || !this.attribLocations || !this.vertexBuffer || !this.textureCoordsBuffer) {
+  updateView (): void {
+    if (!this.program || !this.uniforms) {
       throw new Error('Fatal Error')
     }
-    const gl = this.gl
+    const gl = this.viewport.gl
+    gl.useProgram(this.program)
+    console.log(gl.canvas.width, gl.canvas.height)
+    // gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, matrix.orthographic(0, gl.canvas.width, gl.canvas.height, 0, -10, 10))
+    // gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, matrix.perspective(2, 1, -100, 100))
+    // gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, matrix.perspective(0, gl.canvas.width, gl.canvas.height, 0, -10, 10))
+    // gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, matrix.perspective(0, 1000, 1000, 0, -10, 10))
+    // gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, matrix.perspective(0, 1000, 1000, 0, -10, 10))
+    gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, matrix.perspective(this.viewport.viewRight, this.viewport.viewLeft, this.viewport.viewTop, this.viewport.viewBottom, -10, 10))
+    // gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, matrix.perspective(-90 / 1.5, 90 / 1.5, 45 / 1.5, -45 / 1.5, 1, 10))
+  }
+
+  render (): void {
+    if (!this.program || !this.uniforms || !this.attribLocations || !this.vertexBuffer || !this.textureCoordsBuffer) {
+      throw new Error('Fatal Error')
+    }
+    const gl = this.viewport.gl
     gl.useProgram(this.program)
     // this.x = 0.5
     // this.y = 0.5
-    gl.uniformMatrix4fv(this.uniformLocations.layerMatrix, false, new Float32Array([
+    gl.uniformMatrix4fv(this.uniforms.layerMatrix, false, new Float32Array([
       1.0, 0.0, 0.0, 0.0,
       0.0, 1.0, 0.0, 0.0,
       0.0, 0.0, 1.0, 0.0,
