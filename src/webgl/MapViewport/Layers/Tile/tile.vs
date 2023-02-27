@@ -7,7 +7,7 @@ attribute vec2 aVertexTextureCoords;
 varying vec2 vTextureCoords;
 
 void main() {
-    vec4 position = vec4(aVertexPosition, 0.0, 1.0);
+    vec4 position = vec4(aVertexPosition, 1.0, 1.0);
     position.x = position.x + offsetTile.x;
     position.y = position.y + offsetTile.y;
     gl_Position = viewMatrix * layerMatrix * position;

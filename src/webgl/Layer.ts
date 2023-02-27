@@ -1,9 +1,9 @@
 import Element from './Element'
 import Viewport from './Viewport'
 
-export default abstract class Layer {
+export default abstract class Layer<ElementType extends Element> {
   viewport: Viewport
-  elements: Element[]
+  elements: ElementType[]
 
   x = 0
   y = 0
@@ -36,7 +36,7 @@ export default abstract class Layer {
     return shader
   }
 
-  addElements (elements: Element[]) {
+  addElements (elements: ElementType[]) {
     for (const element of elements) {
       // element.layer = this
       this.elements.push(element)

@@ -53,7 +53,7 @@ export default class InteractiveViewport extends Viewport {
   }
 
   wheel (event: WheelEvent) {
-    this.z += event.deltaY / 1000
+    this.z -= event.deltaY / 1000
     console.log(this.z)
     for (const layer of this.layers) {
       layer.setPos(this.x, this.y, this.z)

@@ -4,7 +4,7 @@ import fsSource from './tile.fs'
 import TileElement from './TileElement'
 import matrix from '@/webgl/matrix'
 
-export default class TileLayer extends Layer {
+export default class TileLayer extends Layer<TileElement> {
   program?: WebGLProgram
 
   attribLocations?: {
@@ -21,7 +21,7 @@ export default class TileLayer extends Layer {
 
   tileSize = 256
 
-  tileZ = 3
+  tileZ = 4
   urlBuilder = (x: number, y: number, z: number): string => `https://tile.openstreetmap.org/${z}/${x}/${y}.png`
 
   // 1 2x2
@@ -113,13 +113,19 @@ export default class TileLayer extends Layer {
     }
     const gl = this.viewport.gl
     gl.useProgram(this.program)
-    console.log(gl.canvas.width, gl.canvas.height)
     // gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, matrix.orthographic(0, gl.canvas.width, gl.canvas.height, 0, -10, 10))
     // gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, matrix.perspective(2, 1, -100, 100))
     // gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, matrix.perspective(0, gl.canvas.width, gl.canvas.height, 0, -10, 10))
     // gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, matrix.perspective(0, 1000, 1000, 0, -10, 10))
     // gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, matrix.perspective(0, 1000, 1000, 0, -10, 10))
-    gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, matrix.perspective(this.viewport.viewRight, this.viewport.viewLeft, this.viewport.viewTop, this.viewport.viewBottom, -10, 10))
+    // gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, matrix.perspective(this.viewport.viewRight, this.viewport.viewLeft, this.viewport.viewTop, this.viewport.viewBottom, -10, 10))
+    // gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, matrix.perspectiveV2(this.x, this.y, this.z, gl.canvas.width / gl.canvas.height))
+    gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, new Float32Array([
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1,
+    ]))
     // gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, matrix.perspective(-90 / 1.5, 90 / 1.5, 45 / 1.5, -45 / 1.5, 1, 10))
   }
 
@@ -131,12 +137,14 @@ export default class TileLayer extends Layer {
     gl.useProgram(this.program)
     // this.x = 0.5
     // this.y = 0.5
-    gl.uniformMatrix4fv(this.uniforms.layerMatrix, false, new Float32Array([
-      1.0, 0.0, 0.0, 0.0,
-      0.0, 1.0, 0.0, 0.0,
-      0.0, 0.0, 1.0, 0.0,
-      this.x, this.y, this.z + 1, 1.0
-    ]))
+    // gl.uniformMatrix4fv(this.uniforms.layerMatrix, false, new Float32Array([
+    //   1.0, 0.0, 0.0, 0.0,
+    //   0.0, 1.0, 0.0, 0.0,
+    //   0.0, 0.0, 1.0, 0.0,
+    //   this.x, this.y, this.z + 1, 1.0
+    // ]))
+    // console.log(this.x, this.y, this.z)
+    gl.uniformMatrix4fv(this.uniforms.layerMatrix, false, matrix.perspectiveV2(this.x, this.y, this.z, gl.canvas.width / gl.canvas.height))
     // console.log(this.x, this.y, this.z)
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer)
     gl.vertexAttribPointer(this.attribLocations.vertex, 2, gl.FLOAT, false, 0, 0)

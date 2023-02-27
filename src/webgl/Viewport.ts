@@ -1,9 +1,10 @@
 import Layer from './Layer'
+import Element from './Element'
 
 export default abstract class Viewport {
   canvas: HTMLCanvasElement
   gl: WebGLRenderingContext
-  layers: Layer[]
+  layers: Layer<Element>[]
 
   x = 0
   y = 0

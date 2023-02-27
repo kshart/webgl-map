@@ -110,6 +110,55 @@ export default {
   },
 
   /**
+   * @see https://www.wolframalpha.com/input?i2d=true&i=transpose+%7B%7BDivide%5BPower%5B2%2C%5C%2840%29z%2B1%5C%2841%29%5D%2CDivide%5B180%2Ca%5D%5D%2C0%2C0%2C0%7D%2C%7B0%2CDivide%5BPower%5B2%2Cz%2B1%5D%2C90%5D%2C0%2C0%7D%2C%7B0%2C0%2C1%2C0%7D%2C%7B0%2C0%2C0%2C1%7D%7D%7B%7B1%2C0%2C0%2C0%7D%2C%7B0%2C-1%2C0%2C0%7D%2C%7B0%2C0%2C1%2C0%7D%2C%7B0%2C0%2C0%2C1%7D%7D%7B%7B1%2C0%2C0%2Cx%7D%2C%7B0%2C1%2C0%2Cy%7D%2C%7B0%2C0%2C1%2C0%7D%2C%7B0%2C0%2C0%2C1%7D%7D
+   */
+  perspectiveV2 (x: number, y: number, z: number, aspect: number): Float32Array {
+    z--
+    const zi = z - 1
+    return new Float32Array([
+      (2 ** zi) / (45 * aspect), 0, 0, 0,
+      0, 2 ** z / -45, 0, 0,
+      0, 0, 1, 0,
+      (x * 2 ** zi) / (45 * aspect), (y * 2 ** z) / -45, 0, 1
+    ])
+  },
+
+  perspectiveV3 (x: number, y: number, z: number, aspect: number): Float32Array {
+    z--
+    const zi = z - 1
+    return new Float32Array([
+      45 * 2 ** (1 - z), 0, 0, 0,
+      0, -45 * 2 ** (1 - z), 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1
+    ])
+    // return new Float32Array([
+    //   (2 ** zi) / (15 * aspect), 0, 0, 0,
+    //   0, 2 ** z / -15, 0, 0,
+    //   0, 0, 1, 0,
+    //   3 * x, 3 * y, 0, 1
+    // ])
+    return new Float32Array([
+      z, 0, 0, 0,
+      0, z / 2, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1
+    ])
+    return new Float32Array([
+      (2 ** zi) / (45 * aspect), 0, 0, 0,
+      0, 2 ** z / -45, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1
+    ])
+    return new Float32Array([
+      (2 ** zi) / (45 * aspect), 0, 0, 0,
+      0, 2 ** z / -45, 0, 0,
+      0, 0, 1, 0,
+      (x * 2 ** zi) / (45 * aspect), (y * 2 ** z) / -45, 0, 1
+    ])
+  },
+
+  /**
    * Each of the parameters represents the plane of the bounding box
    */
   orthographic (left: number, right: number, bottom: number, top: number, near: number, far: number): Float32Array {

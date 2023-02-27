@@ -4,6 +4,10 @@ import MarkerLayer from './Layers/Marker/MarkerLayer'
 import InteractiveViewport from '../InteractiveViewport'
 
 export default class MapViewport extends InteractiveViewport {
+  x = 0
+  y = 0
+  z = 0
+
   constructor (canvas: HTMLCanvasElement) {
     // const gl = WebGLDebugUtils.makeDebugContext(canvas.getContext('webgl'))
     const gl = canvas.getContext('webgl', {
