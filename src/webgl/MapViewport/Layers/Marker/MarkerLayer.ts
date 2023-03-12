@@ -19,7 +19,7 @@ export default class MarkerLayer extends Layer<MarkerElement> {
     vertex: null as WebGLBuffer | null
   }
 
-  init (): void {
+  mount (): void {
     const gl = this.viewport.gl
     const program = gl.createProgram()
     if (!program) {

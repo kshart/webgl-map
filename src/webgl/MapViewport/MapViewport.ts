@@ -30,7 +30,7 @@ export default class MapViewport extends InteractiveViewport {
     this.layers.push(new TileGroupLayer(this))
     this.layers.push(new MarkerLayer(this))
     for (const layer of this.layers) {
-      layer.init()
+      layer.mount()
     }
   }
 }

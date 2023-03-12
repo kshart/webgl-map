@@ -18,7 +18,11 @@ export default abstract class Element {
     this.z = z
   }
 
-  init (): void {
+  mount (): void {
+    //
+  }
+
+  unmount (): void {
     //
   }
 

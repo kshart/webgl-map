@@ -5,10 +5,12 @@ export default class TileElement extends Element {
   url: string
   layer: TileLayer
   texture: WebGLTexture
+  image?: HTMLImageElement
   loaded = false
 
   constructor (layer: TileLayer, url: string, x: number, y: number) {
     super()
+    this.image = new Image()
     this.x = x
     this.y = y
     this.url = url
@@ -20,19 +22,34 @@ export default class TileElement extends Element {
     }
     this.texture = texture
 
-    const image = new Image()
-    image.crossOrigin = 'anonymous'
-    image.onload = () => {
+    this.image.crossOrigin = 'anonymous'
+    this.image.onload = () => {
+      if (!this.image) {
+        return
+      }
       gl.activeTexture(gl.TEXTURE0)
       gl.bindTexture(gl.TEXTURE_2D, texture)
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.image)
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+      this.image.src = ''
+      this.image.remove()
+      delete this.image
       this.loaded = true
     }
-    image.src = url
+    this.image.src = url
+  }
+
+  unmount () {
+    if (this.image) {
+      this.image.src = ''
+      this.image.remove()
+      delete this.image
+    }
+    const gl = this.layer.viewport.gl
+    gl.deleteTexture(this.texture)
   }
 
   render (): void {

@@ -21,6 +21,12 @@ export default abstract class Layer<ChildType extends Element> extends Element {
     }
   }
 
+  unmount () {
+    for (const tile of this.childs) {
+      tile.unmount()
+    }
+  }
+
   loadShader (type: number, source: string): WebGLShader {
     const gl = this.viewport.gl
     const shader = gl.createShader(type)
@@ -41,8 +47,15 @@ export default abstract class Layer<ChildType extends Element> extends Element {
     for (const child of childs) {
       // element.layer = this
       this.childs.push(child)
-      child.init()
+      child.mount()
     }
+  }
+
+  removeChilds (childs: ChildType[]) {
+    for (const child of childs) {
+      child.unmount()
+    }
+    this.childs = this.childs.filter(ch => !childs.includes(ch))
   }
 
   abstract updateView (): void

@@ -21,7 +21,7 @@ export default class TileLayer extends Layer<TileElement> {
 
   tileSize = 256
 
-  tileZ = 2
+  tileZ = 1
   opacity = 1
   urlBuilder = (x: number, y: number, z: number): string => `https://tile.openstreetmap.org/${z}/${x}/${y}.png`
 
@@ -30,7 +30,11 @@ export default class TileLayer extends Layer<TileElement> {
   // x 180 : 180
   // y -90 : 90
 
-  init (): void {
+  get tileCount () {
+    return 2 ** this.tileZ
+  }
+
+  mount (): void {
     const gl = this.viewport.gl
     const program = gl.createProgram()
     if (!program) {
@@ -63,11 +67,9 @@ export default class TileLayer extends Layer<TileElement> {
       this.uniforms[name] = gl.getUniformLocation(this.program, name)
     }
 
-    const tileCount = 2 ** this.tileZ
-
+    const tileCount = this.tileCount
     gl.enableVertexAttribArray(this.attribLocations.vertex)
     gl.enableVertexAttribArray(this.attribLocations.textureCoords)
-    console.log(this)
     const vertexBuffer = gl.createBuffer()
     const textureCoordsBuffer = gl.createBuffer()
     if (!textureCoordsBuffer || !vertexBuffer) {
@@ -89,14 +91,43 @@ export default class TileLayer extends Layer<TileElement> {
     ]), gl.STATIC_DRAW)
     this.vertexBuffer = vertexBuffer
     this.textureCoordsBuffer = textureCoordsBuffer
+    this.loadTiles()
+  }
 
-    for (let x = 0; x < tileCount; x++) {
-      for (let y = 0; y < tileCount; y++) {
-        this.addChilds([
-          new TileElement(this, this.urlBuilder(x, y, this.tileZ), (x / tileCount) * 360 - 180, (y / tileCount) * 180 - 90),
-        ])
+  loadTiles () {
+    const tileCount = this.tileCount
+    const loadBox = {
+      top: 0,
+      bottom: tileCount,
+      left: 0,
+      right: tileCount,
+    }
+    const xn = (this.x + 180) / 360 * tileCount
+    const yn = (this.y + 90) / 180 * tileCount
+
+    const toLoad = []
+    for (let x = loadBox.left; x < loadBox.right; x++) {
+      for (let y = loadBox.top; y < loadBox.bottom; y++) {
+        toLoad.push({
+          x,
+          y,
+          length: Math.sqrt((x - xn + 0.5) ** 2 + (y - yn + 0.5) ** 2)
+        })
       }
     }
+    toLoad.sort((a, b) => a.length - b.length)
+    for (const { x, y } of toLoad.slice(0, 100)) {
+      this.addChilds([
+        new TileElement(this, this.urlBuilder(x, y, this.tileZ), (x / tileCount) * 360 - 180, (y / tileCount) * 180 - 90),
+      ])
+    }
+    // for (let x = 0; x < tileCount; x++) {
+    //   for (let y = 0; y < tileCount; y++) {
+    //     this.addChilds([
+    //       new TileElement(this, this.urlBuilder(x, y, this.tileZ), (x / tileCount) * 360 - 180, (y / tileCount) * 180 - 90),
+    //     ])
+    //   }
+    // }
   }
 
   updateView (): void {
