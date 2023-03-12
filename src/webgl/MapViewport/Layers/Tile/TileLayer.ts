@@ -21,7 +21,8 @@ export default class TileLayer extends Layer<TileElement> {
 
   tileSize = 256
 
-  tileZ = 4
+  tileZ = 2
+  opacity = 1
   urlBuilder = (x: number, y: number, z: number): string => `https://tile.openstreetmap.org/${z}/${x}/${y}.png`
 
   // 1 2x2
@@ -42,7 +43,6 @@ export default class TileLayer extends Layer<TileElement> {
     }
     this.uniforms = {
       offsetTile: null,
-      layerMatrix: null,
       opacity: null,
       uSampler: null,
       viewMatrix: null,
@@ -62,8 +62,6 @@ export default class TileLayer extends Layer<TileElement> {
     for (const name in this.uniforms) {
       this.uniforms[name] = gl.getUniformLocation(this.program, name)
     }
-
-    gl.uniform1f(this.uniforms.opacity, 0.0)
 
     const tileCount = 2 ** this.tileZ
 
@@ -94,17 +92,11 @@ export default class TileLayer extends Layer<TileElement> {
 
     for (let x = 0; x < tileCount; x++) {
       for (let y = 0; y < tileCount; y++) {
-        this.addElements([
+        this.addChilds([
           new TileElement(this, this.urlBuilder(x, y, this.tileZ), (x / tileCount) * 360 - 180, (y / tileCount) * 180 - 90),
         ])
       }
     }
-    // this.addElements([ww
-    //   new TileElement(this, 'https://tile.openstreetmap.org/9/334/160.png', 0, 0),
-    //   new TileElement(this, 'https://tile.openstreetmap.org/9/335/160.png', this.tileSize, 0),
-    //   new TileElement(this, 'https://tile.openstreetmap.org/9/334/161.png', 0, this.tileSize),
-    //   new TileElement(this, 'https://tile.openstreetmap.org/9/335/161.png', this.tileSize, this.tileSize),
-    // ])
   }
 
   updateView (): void {
@@ -135,25 +127,17 @@ export default class TileLayer extends Layer<TileElement> {
     }
     const gl = this.viewport.gl
     gl.useProgram(this.program)
-    // this.x = 0.5
-    // this.y = 0.5
-    // gl.uniformMatrix4fv(this.uniforms.layerMatrix, false, new Float32Array([
-    //   1.0, 0.0, 0.0, 0.0,
-    //   0.0, 1.0, 0.0, 0.0,
-    //   0.0, 0.0, 1.0, 0.0,
-    //   this.x, this.y, this.z + 1, 1.0
-    // ]))
-    // console.log(this.x, this.y, this.z)
-    gl.uniformMatrix4fv(this.uniforms.layerMatrix, false, matrix.perspectiveV2(this.x, this.y, this.z, gl.canvas.width / gl.canvas.height))
-    // console.log(this.x, this.y, this.z)
+    gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, matrix.perspectiveV2(this.x, this.y, this.z, gl.canvas.width / gl.canvas.height))
+    gl.uniform1f(this.uniforms.opacity, this.opacity)
+
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer)
     gl.vertexAttribPointer(this.attribLocations.vertex, 2, gl.FLOAT, false, 0, 0)
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this.textureCoordsBuffer)
     gl.vertexAttribPointer(this.attribLocations.textureCoords, 2, gl.FLOAT, false, 0, 0)
 
-    for (const tileElement of this.elements) {
-      tileElement.render()
+    for (const child of this.childs) {
+      child.render()
     }
   }
 }

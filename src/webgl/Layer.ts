@@ -1,22 +1,23 @@
 import Element from './Element'
 import Viewport from './Viewport'
 
-export default abstract class Layer<ElementType extends Element> {
+export default abstract class Layer<ChildType extends Element> extends Element {
   viewport: Viewport
-  elements: ElementType[]
+  childs: ChildType[]
 
   x = 0
   y = 0
   z = 0
 
   constructor (viewport: Viewport) {
+    super()
     this.viewport = viewport
-    this.elements = []
+    this.childs = []
   }
 
   render (): void {
-    for (const element of this.elements) {
-      element.render()
+    for (const child of this.childs) {
+      child.render()
     }
   }
 
@@ -36,19 +37,13 @@ export default abstract class Layer<ElementType extends Element> {
     return shader
   }
 
-  addElements (elements: ElementType[]) {
-    for (const element of elements) {
+  addChilds (childs: ChildType[]) {
+    for (const child of childs) {
       // element.layer = this
-      this.elements.push(element)
+      this.childs.push(child)
+      child.init()
     }
   }
 
-  setPos (x: number, y: number, z: number) {
-    this.x = x
-    this.y = y
-    this.z = z
-  }
-
-  abstract init (): void
   abstract updateView (): void
 }

@@ -4,7 +4,7 @@ uniform sampler2D uSampler;
 varying vec2 vTextureCoords;
 
 void main() {
-    // gl_FragColor = vec4(vTextureCoords.x, vTextureCoords.x, vTextureCoords.x, 1.0);
+    // gl_FragColor = vec4(vTextureCoords.x, vTextureCoords.y, 1.0, 1.0);
     if (opacity <= 0.0) {
         gl_FragColor = vec4(vTextureCoords.x, vTextureCoords.y, 0.0, 1.0);
     } else {

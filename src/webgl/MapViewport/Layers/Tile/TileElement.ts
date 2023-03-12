@@ -44,10 +44,7 @@ export default class TileElement extends Element {
 
     if (this.loaded) {
       gl.bindTexture(gl.TEXTURE_2D, this.texture)
-      gl.uniform1f(this.layer.uniforms.opacity, 1.0)
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
-    } else {
-      gl.uniform1f(this.layer.uniforms.opacity, 0.0)
     }
   }
 }

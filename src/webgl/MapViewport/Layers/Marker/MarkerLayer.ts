@@ -71,19 +71,15 @@ export default class MarkerLayer extends Layer<MarkerElement> {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
     this.buffers.vertex = vertexBuffer
 
-    const elements = []
+    const childs = []
     for (let x = 0; x < 256 * 8; x++) {
-      elements.push(new MarkerElement(this, Math.random() * 360 - 180, Math.random() * 180 - 90))
+      childs.push(new MarkerElement(this, Math.random() * 360 - 180, Math.random() * 180 - 90))
     }
-    this.addElements(elements)
+    this.addChilds(childs)
   }
 
   updateView (): void {
-    // if (!this.program || !this.uniforms) {
-    //   throw new Error('Fatal Error')
-    // }
-    // const gl = this.viewport.gl
-    // gl.useProgram(this.program)
+    console.log('updateView')
   }
 
   render (): void {
@@ -103,8 +99,8 @@ export default class MarkerLayer extends Layer<MarkerElement> {
     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.vertex)
     gl.vertexAttribPointer(this.attribs.vertex, 2, gl.FLOAT, false, 0, 0)
 
-    for (const element of this.elements) {
-      element.render()
+    for (const child of this.childs) {
+      child.render()
     }
   }
 }
