@@ -121,6 +121,7 @@ export default class InteractiveViewport extends Viewport {
     if (!this.dragData) {
       return
     }
+    console.log(this.viewLeft, this.viewRight)
     const offsetX = ((x - this.dragData.bbox.left) / this.dragData.bbox.width - this.dragData.viewX) * Math.abs(this.viewLeft - this.viewRight)
     this.x = offsetX + this.dragData.localX
     const offsetY = ((y - this.dragData.bbox.top) / this.dragData.bbox.height - this.dragData.viewY) * Math.abs(this.viewTop - this.viewBottom)

@@ -205,9 +205,9 @@ export default {
     const zi = z - 1
     return new Float32Array([
       (2 ** zi) / (45 * aspect), 0, 0, 0,
-      0, 2 ** z / -45, 0, 0,
+      0, 2 ** z / 45, 0, 0,
       0, 0, 1, 0,
-      (x * 2 ** zi) / (45 * aspect), (y * 2 ** z) / -45, 0, 1
+      (-x * 2 ** zi) / (45 * aspect), (y * 2 ** z) / -45, 0, 1
     ])
   },
 

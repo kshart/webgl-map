@@ -1,8 +1,10 @@
 import Layer from '@/webgl/Layer'
+import matrix from '@/webgl/matrix'
+import Viewport from '@/webgl/Viewport'
 import vsSource from './tile.vs'
 import fsSource from './tile.fs'
 import TileElement from './TileElement'
-import matrix from '@/webgl/matrix'
+import TileGroupLayer from './TileGroupLayer'
 
 /**
  * Слой с тайтлами для определенного зума.
@@ -10,6 +12,7 @@ import matrix from '@/webgl/matrix'
  */
 export default class TileLayer extends Layer<TileElement> {
   private program?: WebGLProgram
+  private tileGroup?: TileGroupLayer
 
   private attribLocations?: {
     textureCoords: number
@@ -25,7 +28,6 @@ export default class TileLayer extends Layer<TileElement> {
 
   private vertexBuffer?: WebGLBuffer
   private textureCoordsBuffer?: WebGLBuffer
-  private viewMatrix?: Float32Array
 
   tileSize = 256
   tileZ = 1
@@ -40,6 +42,11 @@ export default class TileLayer extends Layer<TileElement> {
 
   get tileCount () {
     return 2 ** this.tileZ
+  }
+
+  constructor (viewport: Viewport, tileGroup: TileGroupLayer) {
+    super(viewport)
+    this.tileGroup = tileGroup
   }
 
   mount (): void {
@@ -86,9 +93,9 @@ export default class TileLayer extends Layer<TileElement> {
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer)
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
       0.0, 0.0,
-      0.0, 180 / tileCount,
+      0.0, -180 / tileCount,
       360 / tileCount, 0.0,
-      360 / tileCount, 180 / tileCount,
+      360 / tileCount, -180 / tileCount,
     ]), gl.STATIC_DRAW)
     gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordsBuffer)
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
@@ -106,22 +113,26 @@ export default class TileLayer extends Layer<TileElement> {
    * Загрузить все тайтлы в слой
    */
   loadTiles () {
-    const gl = this.viewport.gl
-    if (!this.viewMatrix) {
-      this.viewMatrix = matrix.perspectiveV2(this.x, this.y, this.z, gl.canvas.width / gl.canvas.height)
+    if (!this.tileGroup?.viewMatrix) {
+      return
     }
     const tileCount = this.tileCount
-    let [left, top] = matrix.multiply4toPoint(this.viewMatrix, new Float32Array([-1, 1, 1, 1]))
-    let [right, bottom] = matrix.multiply4toPoint(this.viewMatrix, new Float32Array([1, -1, 1, 1]))
+    let [left, top] = matrix.multiply4toPoint(this.tileGroup.viewMatrix, new Float32Array([-1, 1, 1, 1]))
+    let [right, bottom] = matrix.multiply4toPoint(this.tileGroup.viewMatrix, new Float32Array([1, -1, 1, 1]))
     left = (left + 180) / 360 * tileCount
     right = (right + 180) / 360 * tileCount
-    top = (top + 90) / 180 * tileCount
-    bottom = (bottom + 90) / 180 * tileCount
+    top = (-top + 90) / 180 * tileCount
+    bottom = (-bottom + 90) / 180 * tileCount
     const offset = 0
     left = Math.min(Math.max(Math.floor(left - offset), 0), tileCount)
     right = Math.min(Math.max(Math.ceil(right + offset), 0), tileCount)
     top = Math.min(Math.max(Math.floor(top - offset), 0), tileCount)
     bottom = Math.min(Math.max(Math.ceil(bottom + offset), 0), tileCount)
+    // top = 0
+    // bottom = tileCount
+    // left = 0
+    // right = tileCount
+    // console.log(left + ' ' + right, top + ' ' + bottom)
     const loadBox = {
       top,
       bottom,
@@ -129,26 +140,27 @@ export default class TileLayer extends Layer<TileElement> {
       right,
     }
     const xn = ((this.x + 180) / 360) * tileCount
-    const yn = ((this.y + 90) / 180) * tileCount
-    console.log(this.x + ' ' + this.y, xn + ' ' + yn, loadBox)
+    const yn = ((-this.y + 90) / 180) * tileCount
+    // console.log(this.x + ' ' + this.y, xn + ' ' + yn, loadBox)
     const toLoad = []
     for (let x = loadBox.left; x < loadBox.right; x++) {
       for (let y = loadBox.top; y < loadBox.bottom; y++) {
         toLoad.push({
           x,
           y,
-          length: Math.sqrt((x - xn + 0) ** 2 + (y - yn + 0) ** 2)
+          length: Math.sqrt((x - xn + 0.5) ** 2 + (y - yn + 0.5) ** 2)
         })
       }
     }
     toLoad.sort((a, b) => a.length - b.length)
-    console.log(toLoad)
+    // console.log(toLoad)
     this.removeChilds(this.childs)
-    for (const { x, y } of toLoad.slice(0, 16)) {
+    for (const { x, y } of toLoad.slice(0, 32)) {
       this.addChilds([
-        new TileElement(this, this.urlBuilder(x, y, this.tileZ), (x / tileCount) * 360 - 180, (y / tileCount) * 180 - 90),
+        new TileElement(this, this.urlBuilder(x, y, this.tileZ), (x / tileCount) * 360 - 180, (y / tileCount) * -180 + 90),
       ])
     }
+    // console.log(toLoad.length)
     // for (let x = 0; x < tileCount; x++) {
     //   for (let y = 0; y < tileCount; y++) {
     //     this.addChilds([
@@ -181,13 +193,12 @@ export default class TileLayer extends Layer<TileElement> {
   }
 
   render (): void {
-    if (!this.program || !this.uniforms || !this.attribLocations || !this.vertexBuffer || !this.textureCoordsBuffer) {
+    if (!this.program || !this.uniforms || !this.attribLocations || !this.vertexBuffer || !this.textureCoordsBuffer || !this.tileGroup?.viewMatrix) {
       throw new Error('Fatal Error')
     }
     const gl = this.viewport.gl
-    this.viewMatrix = matrix.perspectiveV2(this.x, this.y, this.z, gl.canvas.width / gl.canvas.height)
     gl.useProgram(this.program)
-    gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, this.viewMatrix)
+    gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, this.tileGroup.viewMatrix)
     gl.uniform1f(this.uniforms.opacity, this.opacity)
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer)

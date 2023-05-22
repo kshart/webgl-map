@@ -52,7 +52,6 @@ export default class MarkerLayer extends Layer<MarkerElement> {
     gl.uniform1f(this.uniforms.opacity, 0.0)
 
     gl.enableVertexAttribArray(this.attribs.vertex)
-    console.log(this)
     const vertexBuffer = gl.createBuffer()
     if (!vertexBuffer) {
       throw new Error('Fail create buffer')
