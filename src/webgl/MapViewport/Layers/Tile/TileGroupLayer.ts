@@ -19,12 +19,19 @@ export default class TileGroupLayer extends Layer<TileLayer> {
   currentZoom?: number
   tileLayers = new Map<number, TileLayerConfig>()
   viewMatrix?: Float32Array
+
+  /**
+   * @override
+   */
   mount (): void {
     this.setZoom(this.minZoom)
     const gl = this.viewport.gl
     this.viewMatrix = matrix.perspectiveV2(this.x, this.y, this.z, gl.canvas.width / gl.canvas.height)
   }
 
+  /**
+   * @override
+   */
   setPos (x: number, y: number, z: number) {
     let zoom = z
     if (zoom < this.minZoom) {
@@ -46,12 +53,20 @@ export default class TileGroupLayer extends Layer<TileLayer> {
     }
   }
 
+  /**
+   * @override
+   */
   updateView (): void {
+    const gl = this.viewport.gl
+    this.viewMatrix = matrix.perspectiveV2(this.x, this.y, this.z, gl.canvas.width / gl.canvas.height)
     for (const child of this.childs) {
       child.updateView()
     }
   }
 
+  /**
+   * @override
+   */
   private setZoom (zoom: number): void {
     const toRemove: TileLayer[] = []
     for (const [index, conf] of this.tileLayers) {

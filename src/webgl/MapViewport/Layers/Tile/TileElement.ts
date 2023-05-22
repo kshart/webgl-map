@@ -45,6 +45,9 @@ export default class TileElement extends Element {
     this.image.src = url
   }
 
+  /**
+   * @override
+   */
   unmount () {
     if (this.image) {
       this.image.src = ''
@@ -55,6 +58,9 @@ export default class TileElement extends Element {
     gl.deleteTexture(this.texture)
   }
 
+  /**
+   * @override
+   */
   render (): void {
     if (!this.layer.uniforms) {
       throw new Error('Fatal Error')

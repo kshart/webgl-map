@@ -11,6 +11,9 @@ export default class MarkerElement extends Element {
     this.layer = layer
   }
 
+  /**
+   * @override
+   */
   render (): void {
     if (!this.layer.uniforms) {
       throw new Error('Fatal Error')

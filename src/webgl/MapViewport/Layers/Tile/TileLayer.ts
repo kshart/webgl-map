@@ -49,6 +49,9 @@ export default class TileLayer extends Layer<TileElement> {
     this.tileGroup = tileGroup
   }
 
+  /**
+   * @override
+   */
   mount (): void {
     const gl = this.viewport.gl
     const program = gl.createProgram()
@@ -170,6 +173,9 @@ export default class TileLayer extends Layer<TileElement> {
     // }
   }
 
+  /**
+   * @override
+   */
   updateView (): void {
     if (!this.program || !this.uniforms) {
       throw new Error('Fatal Error')
@@ -192,6 +198,9 @@ export default class TileLayer extends Layer<TileElement> {
     // gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, matrix.perspective(-90 / 1.5, 90 / 1.5, 45 / 1.5, -45 / 1.5, 1, 10))
   }
 
+  /**
+   * @override
+   */
   render (): void {
     if (!this.program || !this.uniforms || !this.attribLocations || !this.vertexBuffer || !this.textureCoordsBuffer || !this.tileGroup?.viewMatrix) {
       throw new Error('Fatal Error')

@@ -19,6 +19,9 @@ export default class MarkerLayer extends Layer<MarkerElement> {
     vertex: null as WebGLBuffer | null
   }
 
+  /**
+   * @override
+   */
   mount (): void {
     const gl = this.viewport.gl
     const program = gl.createProgram()
@@ -77,10 +80,16 @@ export default class MarkerLayer extends Layer<MarkerElement> {
     this.addChilds(childs)
   }
 
+  /**
+   * @override
+   */
   updateView (): void {
     console.log('updateView')
   }
 
+  /**
+   * @override
+   */
   render (): void {
     if (!this.program || !this.uniforms || !this.attribs || !this.buffers.vertex) {
       throw new Error('Fatal Error')
