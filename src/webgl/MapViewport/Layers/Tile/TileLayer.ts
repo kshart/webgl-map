@@ -4,25 +4,33 @@ import fsSource from './tile.fs'
 import TileElement from './TileElement'
 import matrix from '@/webgl/matrix'
 
+/**
+ * Слой с тайтлами для определенного зума.
+ * @TODO ленивая загрузка только видимых тайтлов
+ */
 export default class TileLayer extends Layer<TileElement> {
-  program?: WebGLProgram
+  private program?: WebGLProgram
 
-  attribLocations?: {
+  private attribLocations?: {
     textureCoords: number
     vertex: number
   }
 
-  uniforms?: {
+  /**
+   * Для биндов тайлов
+   */
+  public uniforms?: {
     [index: string]: WebGLUniformLocation | null
   }
 
-  vertexBuffer?: WebGLBuffer
-  textureCoordsBuffer?: WebGLBuffer
+  private vertexBuffer?: WebGLBuffer
+  private textureCoordsBuffer?: WebGLBuffer
+  private viewMatrix?: Float32Array
 
   tileSize = 256
-
   tileZ = 1
   opacity = 1
+
   urlBuilder = (x: number, y: number, z: number): string => `https://tile.openstreetmap.org/${z}/${x}/${y}.png`
 
   // 1 2x2
@@ -91,32 +99,52 @@ export default class TileLayer extends Layer<TileElement> {
     ]), gl.STATIC_DRAW)
     this.vertexBuffer = vertexBuffer
     this.textureCoordsBuffer = textureCoordsBuffer
-    this.loadTiles()
+    setTimeout(() => this.loadTiles(), 1000)
   }
 
+  /**
+   * Загрузить все тайтлы в слой
+   */
   loadTiles () {
-    const tileCount = this.tileCount
-    const loadBox = {
-      top: 0,
-      bottom: tileCount,
-      left: 0,
-      right: tileCount,
+    const gl = this.viewport.gl
+    if (!this.viewMatrix) {
+      this.viewMatrix = matrix.perspectiveV2(this.x, this.y, this.z, gl.canvas.width / gl.canvas.height)
     }
-    const xn = (this.x + 180) / 360 * tileCount
-    const yn = (this.y + 90) / 180 * tileCount
-
+    const tileCount = this.tileCount
+    let [left, top] = matrix.multiply4toPoint(this.viewMatrix, new Float32Array([-1, 1, 1, 1]))
+    let [right, bottom] = matrix.multiply4toPoint(this.viewMatrix, new Float32Array([1, -1, 1, 1]))
+    left = (left + 180) / 360 * tileCount
+    right = (right + 180) / 360 * tileCount
+    top = (top + 90) / 180 * tileCount
+    bottom = (bottom + 90) / 180 * tileCount
+    const offset = 0
+    left = Math.min(Math.max(Math.floor(left - offset), 0), tileCount)
+    right = Math.min(Math.max(Math.ceil(right + offset), 0), tileCount)
+    top = Math.min(Math.max(Math.floor(top - offset), 0), tileCount)
+    bottom = Math.min(Math.max(Math.ceil(bottom + offset), 0), tileCount)
+    const loadBox = {
+      top,
+      bottom,
+      left,
+      right,
+    }
+    const xn = ((this.x + 180) / 360) * tileCount
+    const yn = ((this.y + 90) / 180) * tileCount
+    console.log(this.x + ' ' + this.y, xn + ' ' + yn, loadBox)
     const toLoad = []
     for (let x = loadBox.left; x < loadBox.right; x++) {
       for (let y = loadBox.top; y < loadBox.bottom; y++) {
         toLoad.push({
           x,
           y,
-          length: Math.sqrt((x - xn + 0.5) ** 2 + (y - yn + 0.5) ** 2)
+          length: Math.sqrt((x - xn + 0) ** 2 + (y - yn + 0) ** 2)
         })
       }
     }
     toLoad.sort((a, b) => a.length - b.length)
-    for (const { x, y } of toLoad.slice(0, 100)) {
+    console.log(toLoad)
+    this.removeChilds(this.childs)
+    for (const { x, y } of toLoad.slice(0, 16)) {
       this.addChilds([
         new TileElement(this, this.urlBuilder(x, y, this.tileZ), (x / tileCount) * 360 - 180, (y / tileCount) * 180 - 90),
       ])
@@ -157,8 +185,9 @@ export default class TileLayer extends Layer<TileElement> {
       throw new Error('Fatal Error')
     }
     const gl = this.viewport.gl
+    this.viewMatrix = matrix.perspectiveV2(this.x, this.y, this.z, gl.canvas.width / gl.canvas.height)
     gl.useProgram(this.program)
-    gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, matrix.perspectiveV2(this.x, this.y, this.z, gl.canvas.width / gl.canvas.height))
+    gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, this.viewMatrix)
     gl.uniform1f(this.uniforms.opacity, this.opacity)
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer)

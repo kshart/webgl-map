@@ -6,6 +6,11 @@ interface TileLayerConfig {
   layer: TileLayer
 }
 
+/**
+ * Набор слоев с тайтлами, с разными зумами.
+ * Отображается слой с подходящим зумом.
+ * @TODO нужна ленивая выгрузка\загрузка слоев
+ */
 export default class TileGroupLayer extends Layer<TileLayer> {
   cachedLayers = 0
   minZoom = 3
@@ -45,7 +50,7 @@ export default class TileGroupLayer extends Layer<TileLayer> {
     const toRemove: TileLayer[] = []
     for (const [index, conf] of this.tileLayers) {
       if (index !== zoom) {
-        console.log('remove', index)
+        console.log(`remove zoom(${conf.layer.tileZ}) layer`)
         toRemove.push(conf.layer)
         this.tileLayers.delete(index)
       }
@@ -54,6 +59,7 @@ export default class TileGroupLayer extends Layer<TileLayer> {
       this.removeChilds(toRemove)
     }
     if (!this.tileLayers.has(zoom)) {
+      console.log(`add zoom(${zoom}) layer`)
       const layer = new TileLayer(this.viewport)
       layer.tileZ = zoom
       this.addChilds([layer])
@@ -63,6 +69,5 @@ export default class TileGroupLayer extends Layer<TileLayer> {
       })
     }
     this.currentZoom = zoom
-    console.log('remove', this.tileLayers)
   }
 }

@@ -2,6 +2,7 @@
   <div class="home">
     <img alt="Vue logo" src="../assets/logo.png">
     <canvas ref="canvas" />
+    <div class="center" />
   </div>
 </template>
 
@@ -45,5 +46,12 @@ export default class HomeView extends Vue {
   left: 0;
   width: 100%;
   height: 100%;
+}
+.center {
+  width: 50px;
+  height: 50px;
+  background: #ff0;
+  top: 50%;
+  left: 50%;
 }
 </style>

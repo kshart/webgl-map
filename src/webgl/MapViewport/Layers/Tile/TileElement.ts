@@ -1,6 +1,9 @@
 import Element from '@/webgl/Element'
 import TileLayer from './TileLayer'
 
+/**
+ * Тайтл
+ */
 export default class TileElement extends Element {
   url: string
   layer: TileLayer

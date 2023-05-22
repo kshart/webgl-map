@@ -8,6 +8,8 @@ export default class MapViewport extends InteractiveViewport {
   y = 0
   z = 0
 
+  tileGroup?: TileGroupLayer
+
   constructor (canvas: HTMLCanvasElement) {
     // const gl = WebGLDebugUtils.makeDebugContext(canvas.getContext('webgl'))
     const gl = canvas.getContext('webgl', {
@@ -27,10 +29,21 @@ export default class MapViewport extends InteractiveViewport {
     // gl.colorMask(false, false, false, true)
     // gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
 
-    this.layers.push(new TileGroupLayer(this))
+    this.tileGroup = new TileGroupLayer(this)
+    this.layers.push(this.tileGroup)
     this.layers.push(new MarkerLayer(this))
     for (const layer of this.layers) {
       layer.mount()
+    }
+  }
+
+  dragStop () {
+    super.dragStop()
+    if (!this.tileGroup) {
+      return
+    }
+    for (const [key, { layer }] of this.tileGroup.tileLayers) {
+      layer.loadTiles()
     }
   }
 }
