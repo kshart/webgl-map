@@ -1,3 +1,4 @@
+import matrix from '@/webgl/matrix'
 import Viewport from './Viewport'
 
 export default class InteractiveViewport extends Viewport {
@@ -7,6 +8,10 @@ export default class InteractiveViewport extends Viewport {
     viewX: number
     viewY: number
     bbox: DOMRect
+    left: number
+    top: number
+    right: number
+    bottom: number
   }
 
   private eventHandlers: {
@@ -55,6 +60,8 @@ export default class InteractiveViewport extends Viewport {
   wheel (event: WheelEvent) {
     this.z -= event.deltaY / 1000
     // console.log(this.z)
+    const gl = this.gl
+    this.viewMatrix = matrix.perspectiveV2(this.x, this.y, this.z, gl.canvas.width / gl.canvas.height)
     for (const layer of this.layers) {
       layer.setPos(this.x, this.y, this.z)
     }
@@ -100,13 +107,26 @@ export default class InteractiveViewport extends Viewport {
   }
 
   dragStart (x: number, y: number) {
+    if (!this.viewMatrix) {
+      return
+    }
     const bbox = this.canvas.getBoundingClientRect()
+    const x1 = 1 - (x - bbox.left) / bbox.width
+    const y1 = 1 - (y - bbox.top) / bbox.height
+
+    const [left, top] = matrix.multiply4toPoint(this.viewMatrix, new Float32Array([-1, 1, 1, 1]))
+    const [right, bottom] = matrix.multiply4toPoint(this.viewMatrix, new Float32Array([1, -1, 1, 1]))
+
     this.dragData = {
-      viewX: (x - bbox.left) / bbox.width,
-      viewY: (y - bbox.top) / bbox.height,
+      viewX: left - (left - right) * x1,
+      viewY: top - (top - bottom) * y1,
       localX: this.x,
       localY: this.y,
       bbox,
+      left,
+      top,
+      right,
+      bottom
     }
   }
 
@@ -118,14 +138,26 @@ export default class InteractiveViewport extends Viewport {
   }
 
   drag (x: number, y: number) {
-    if (!this.dragData) {
+    if (!this.dragData || !this.viewMatrix) {
       return
     }
-    console.log(this.viewLeft, this.viewRight)
-    const offsetX = ((x - this.dragData.bbox.left) / this.dragData.bbox.width - this.dragData.viewX) * Math.abs(this.viewLeft - this.viewRight)
-    this.x = offsetX + this.dragData.localX
-    const offsetY = ((y - this.dragData.bbox.top) / this.dragData.bbox.height - this.dragData.viewY) * Math.abs(this.viewTop - this.viewBottom)
-    this.y = offsetY + this.dragData.localY
+    const {
+      viewX,
+      viewY,
+      localX,
+      localY,
+      bbox,
+      left,
+      top,
+      right,
+      bottom
+    } = this.dragData
+    const x1 = 1 - (x - bbox.left) / bbox.width
+    const y1 = 1 - (y - bbox.top) / bbox.height
+    this.x = localX + left - (left - right) * x1 - viewX
+    this.y = localY + top - (top - bottom) * y1 - viewY
+    const gl = this.gl
+    this.viewMatrix = matrix.perspectiveV2(this.x, this.y, this.z, gl.canvas.width / gl.canvas.height)
 
     for (const layer of this.layers) {
       layer.setPos(this.x, this.y, this.z)

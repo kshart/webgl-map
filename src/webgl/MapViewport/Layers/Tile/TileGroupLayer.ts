@@ -18,7 +18,6 @@ export default class TileGroupLayer extends Layer<TileLayer> {
   maxZoom = 15
   currentZoom?: number
   tileLayers = new Map<number, TileLayerConfig>()
-  viewMatrix?: Float32Array
 
   /**
    * @override
@@ -26,7 +25,6 @@ export default class TileGroupLayer extends Layer<TileLayer> {
   mount (): void {
     this.setZoom(this.minZoom)
     const gl = this.viewport.gl
-    this.viewMatrix = matrix.perspectiveV2(this.x, this.y, this.z, gl.canvas.width / gl.canvas.height)
   }
 
   /**
@@ -44,10 +42,7 @@ export default class TileGroupLayer extends Layer<TileLayer> {
     if (zoom !== this.currentZoom) {
       this.setZoom(zoom)
     }
-
     super.setPos(x, y, z)
-    const gl = this.viewport.gl
-    this.viewMatrix = matrix.perspectiveV2(this.x, this.y, this.z, gl.canvas.width / gl.canvas.height)
     for (const child of this.childs) {
       child.setPos(x, y, z)
     }
@@ -57,8 +52,6 @@ export default class TileGroupLayer extends Layer<TileLayer> {
    * @override
    */
   updateView (): void {
-    const gl = this.viewport.gl
-    this.viewMatrix = matrix.perspectiveV2(this.x, this.y, this.z, gl.canvas.width / gl.canvas.height)
     for (const child of this.childs) {
       child.updateView()
     }

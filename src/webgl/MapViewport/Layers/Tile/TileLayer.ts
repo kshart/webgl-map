@@ -116,12 +116,12 @@ export default class TileLayer extends Layer<TileElement> {
    * Загрузить все тайтлы в слой
    */
   loadTiles () {
-    if (!this.tileGroup?.viewMatrix) {
+    if (!this.viewport?.viewMatrix) {
       return
     }
     const tileCount = this.tileCount
-    let [left, top] = matrix.multiply4toPoint(this.tileGroup.viewMatrix, new Float32Array([-1, 1, 1, 1]))
-    let [right, bottom] = matrix.multiply4toPoint(this.tileGroup.viewMatrix, new Float32Array([1, -1, 1, 1]))
+    let [left, top] = matrix.multiply4toPoint(this.viewport.viewMatrix, new Float32Array([-1, 1, 1, 1]))
+    let [right, bottom] = matrix.multiply4toPoint(this.viewport.viewMatrix, new Float32Array([1, -1, 1, 1]))
     left = (left + 180) / 360 * tileCount
     right = (right + 180) / 360 * tileCount
     top = (-top + 90) / 180 * tileCount
@@ -202,12 +202,12 @@ export default class TileLayer extends Layer<TileElement> {
    * @override
    */
   render (): void {
-    if (!this.program || !this.uniforms || !this.attribLocations || !this.vertexBuffer || !this.textureCoordsBuffer || !this.tileGroup?.viewMatrix) {
+    if (!this.program || !this.uniforms || !this.attribLocations || !this.vertexBuffer || !this.textureCoordsBuffer || !this.viewport?.viewMatrix) {
       throw new Error('Fatal Error')
     }
     const gl = this.viewport.gl
     gl.useProgram(this.program)
-    gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, this.tileGroup.viewMatrix)
+    gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, this.viewport.viewMatrix)
     gl.uniform1f(this.uniforms.opacity, this.opacity)
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer)

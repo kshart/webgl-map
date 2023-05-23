@@ -1,4 +1,5 @@
 import Layer from './Layer'
+import matrix from '@/webgl/matrix'
 import Element from './Element'
 
 export default abstract class Viewport {
@@ -14,6 +15,7 @@ export default abstract class Viewport {
   viewRight = 1
   viewTop = -1
   viewBottom = 1
+  viewMatrix?: Float32Array
 
   private updateViewJob = true
   private resizeObserver: ResizeObserver
@@ -41,15 +43,16 @@ export default abstract class Viewport {
     this.updateViewJob = true
   }
 
-  private updateView () {
+  protected updateView () {
     const gl = this.gl
     const canvas = this.canvas
     const bbox = canvas.getBoundingClientRect()
     this.canvas.width = bbox.width * window.devicePixelRatio
     this.canvas.height = bbox.height * window.devicePixelRatio
-    this.viewLeft = -180 * canvas.width / canvas.height
-    this.viewRight = 180 * canvas.width / canvas.height
+    // this.viewLeft = -180 * canvas.width / canvas.height
+    // this.viewRight = 180 * canvas.width / canvas.height
     gl.viewport(0, 0, this.canvas.width, this.canvas.height)
+    this.viewMatrix = matrix.perspectiveV2(this.x, this.y, this.z, gl.canvas.width / gl.canvas.height)
     for (const layer of this.layers) {
       layer.updateView()
     }
