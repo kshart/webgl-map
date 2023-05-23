@@ -64,8 +64,8 @@ export default class MarkerLayer extends Layer<MarkerElement> {
     const totalPoints = 40
     for (let i = 0; i <= totalPoints; i++) {
       const angle = 2 * Math.PI * i / totalPoints
-      const x = 0.02 * Math.cos(angle)
-      const y = 0.01 * Math.sin(angle)
+      const x = 0.5 * 0.02 * Math.cos(angle)
+      const y = 0.5 * 0.01 * Math.sin(angle)
       vertices.push(x)
       vertices.push(y)
     }

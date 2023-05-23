@@ -9,6 +9,7 @@ export default class TileElement extends Element {
   layer: TileLayer
   texture: WebGLTexture
   image?: HTMLImageElement
+  opacity = 0
   loaded = false
 
   constructor (layer: TileLayer, url: string, x: number, y: number) {
@@ -65,8 +66,12 @@ export default class TileElement extends Element {
     if (!this.layer.uniforms) {
       throw new Error('Fatal Error')
     }
+    if (this.loaded && this.opacity < 1) {
+      this.opacity = this.opacity + 0.2
+    }
     const gl = this.layer.viewport.gl
     gl.uniform2f(this.layer.uniforms.offsetTile, this.x, this.y)
+    gl.uniform1f(this.layer.uniforms.tileOpacity, this.opacity)
 
     if (this.loaded) {
       gl.bindTexture(gl.TEXTURE_2D, this.texture)

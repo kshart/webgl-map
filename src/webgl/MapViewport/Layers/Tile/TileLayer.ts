@@ -65,7 +65,8 @@ export default class TileLayer extends Layer<TileElement> {
     }
     this.uniforms = {
       offsetTile: null,
-      opacity: null,
+      layerOpacity: null,
+      tileOpacity: null,
       uSampler: null,
       viewMatrix: null,
     }
@@ -204,7 +205,7 @@ export default class TileLayer extends Layer<TileElement> {
     const gl = this.viewport.gl
     gl.useProgram(this.program)
     gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, this.viewport.viewMatrix)
-    gl.uniform1f(this.uniforms.opacity, this.opacity)
+    gl.uniform1f(this.uniforms.layerOpacity, this.opacity)
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer)
     gl.vertexAttribPointer(this.attribLocations.vertex, 2, gl.FLOAT, false, 0, 0)
