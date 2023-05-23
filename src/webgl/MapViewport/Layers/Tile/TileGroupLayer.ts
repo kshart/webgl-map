@@ -24,7 +24,6 @@ export default class TileGroupLayer extends Layer<TileLayer> {
    */
   mount (): void {
     this.setZoom(this.minZoom)
-    const gl = this.viewport.gl
   }
 
   /**

@@ -113,7 +113,7 @@ export default class TileLayer extends Layer<TileElement> {
   }
 
   /**
-   * Загрузить все тайтлы в слой
+   * Загрузить тайтлы в слой
    */
   loadTiles () {
     if (!this.viewport?.viewMatrix) {
@@ -135,7 +135,6 @@ export default class TileLayer extends Layer<TileElement> {
     // bottom = tileCount
     // left = 0
     // right = tileCount
-    // console.log(left + ' ' + right, top + ' ' + bottom)
     const loadBox = {
       top,
       bottom,
@@ -144,33 +143,30 @@ export default class TileLayer extends Layer<TileElement> {
     }
     const xn = ((this.x + 180) / 360) * tileCount
     const yn = ((-this.y + 90) / 180) * tileCount
-    // console.log(this.x + ' ' + this.y, xn + ' ' + yn, loadBox)
+
     const toLoad = []
+    const loadTileUrls = new Set()
     for (let x = loadBox.left; x < loadBox.right; x++) {
       for (let y = loadBox.top; y < loadBox.bottom; y++) {
+        const url = this.urlBuilder(x, y, this.tileZ)
+        loadTileUrls.add(url)
         toLoad.push({
           x,
           y,
+          url,
           length: Math.sqrt((x - xn + 0.5) ** 2 + (y - yn + 0.5) ** 2)
         })
       }
     }
     toLoad.sort((a, b) => a.length - b.length)
-    // console.log(toLoad)
-    this.removeChilds(this.childs)
-    for (const { x, y } of toLoad.slice(0, 32)) {
-      this.addChilds([
-        new TileElement(this, this.urlBuilder(x, y, this.tileZ), (x / tileCount) * 360 - 180, (y / tileCount) * -180 + 90),
-      ])
+
+    this.removeChilds(this.childs.filter(ch => !loadTileUrls.has(ch.url)))
+
+    const newChilds = []
+    for (const { x, y, url } of toLoad.slice(0, 32).filter(conf => !this.childs.find(ch => ch.url === conf.url))) {
+      newChilds.push(new TileElement(this, url, (x / tileCount) * 360 - 180, (y / tileCount) * -180 + 90))
     }
-    // console.log(toLoad.length)
-    // for (let x = 0; x < tileCount; x++) {
-    //   for (let y = 0; y < tileCount; y++) {
-    //     this.addChilds([
-    //       new TileElement(this, this.urlBuilder(x, y, this.tileZ), (x / tileCount) * 360 - 180, (y / tileCount) * 180 - 90),
-    //     ])
-    //   }
-    // }
+    this.addChilds(newChilds)
   }
 
   /**
