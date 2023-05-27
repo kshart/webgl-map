@@ -73,7 +73,7 @@ export default class TileGroupLayer extends Layer<TileLayer> {
     }
     if (!this.tileLayers.has(zoom)) {
       console.log(`add zoom(${zoom}) layer`)
-      const layer = new TileLayer(this.viewport, this)
+      const layer = new TileLayer(this.viewport)
       layer.tileZ = zoom
       this.addChilds([layer])
       this.tileLayers.set(zoom, {

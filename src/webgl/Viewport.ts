@@ -17,6 +17,10 @@ export default abstract class Viewport {
   viewBottom = 1
   viewMatrix?: Float32Array
 
+  /**
+   * Если true то отрисовка прекращается
+   */
+  private renderDone = false
   private updateViewJob = true
   private resizeObserver: ResizeObserver
 
@@ -32,6 +36,7 @@ export default abstract class Viewport {
   }
 
   destroy (): void {
+    this.renderDone = true
     this.resizeObserver.observe(this.canvas)
   }
 
@@ -73,6 +78,9 @@ export default abstract class Viewport {
 
   renderStart (): void {
     const render = (timestamp: number) => {
+      if (this.renderDone) {
+        return
+      }
       this.render()
       requestAnimationFrame(render)
     }

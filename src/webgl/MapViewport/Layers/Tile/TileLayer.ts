@@ -1,10 +1,8 @@
 import Layer from '@/webgl/Layer'
 import matrix from '@/webgl/matrix'
-import Viewport from '@/webgl/Viewport'
 import vsSource from './tile.vs'
 import fsSource from './tile.fs'
 import TileElement from './TileElement'
-import TileGroupLayer from './TileGroupLayer'
 
 /**
  * Слой с тайтлами для определенного зума.
@@ -12,7 +10,6 @@ import TileGroupLayer from './TileGroupLayer'
  */
 export default class TileLayer extends Layer<TileElement> {
   private program?: WebGLProgram
-  private tileGroup?: TileGroupLayer
 
   private attribLocations?: {
     textureCoords: number
@@ -42,11 +39,6 @@ export default class TileLayer extends Layer<TileElement> {
 
   get tileCount () {
     return 2 ** this.tileZ
-  }
-
-  constructor (viewport: Viewport, tileGroup: TileGroupLayer) {
-    super(viewport)
-    this.tileGroup = tileGroup
   }
 
   /**

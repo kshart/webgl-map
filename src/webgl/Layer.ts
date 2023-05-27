@@ -22,8 +22,8 @@ export default abstract class Layer<ChildType extends Element> extends Element {
   }
 
   unmount () {
-    for (const tile of this.childs) {
-      tile.unmount()
+    for (const child of this.childs) {
+      child.unmount()
     }
   }
 
@@ -45,7 +45,6 @@ export default abstract class Layer<ChildType extends Element> extends Element {
 
   addChilds (childs: ChildType[]) {
     for (const child of childs) {
-      // element.layer = this
       this.childs.push(child)
       child.mount()
     }

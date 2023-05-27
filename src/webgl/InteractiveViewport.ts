@@ -46,7 +46,6 @@ export default class InteractiveViewport extends Viewport {
   }
 
   destroy () {
-    console.log('destroy')
     window.removeEventListener('mouseup', this.eventHandlers.mouseup)
     window.removeEventListener('mousedown', this.eventHandlers.mousedown)
     window.removeEventListener('mousemove', this.eventHandlers.mousemove)
@@ -55,6 +54,7 @@ export default class InteractiveViewport extends Viewport {
     window.removeEventListener('touchcancel', this.eventHandlers.touchcancel)
     window.removeEventListener('touchmove', this.eventHandlers.touchmove)
     window.removeEventListener('wheel', this.eventHandlers.wheel)
+    super.destroy()
   }
 
   wheel (event: WheelEvent) {
