@@ -5,10 +5,6 @@ import MarkerLayer from './Layers/Marker/MarkerLayer'
 import InteractiveViewport from '../InteractiveViewport'
 
 export default class MapViewport extends InteractiveViewport {
-  x = 0
-  y = 0
-  z = 0
-
   tileGroup?: TileGroupLayer
 
   constructor (canvas: HTMLCanvasElement) {
@@ -23,7 +19,6 @@ export default class MapViewport extends InteractiveViewport {
       throw new Error('Context webgl not created')
     }
     super(canvas, gl)
-    // this.setViewport(-180, 180, 90, -90)
     gl.clearColor(0.0, 0.0, 0.0, 0.5)
     gl.clearDepth(1.0)
     gl.enable(gl.BLEND)
@@ -49,5 +44,19 @@ export default class MapViewport extends InteractiveViewport {
     for (const [key, { layer }] of this.tileGroup.tileLayers) {
       layer.loadTiles()
     }
+  }
+
+  public setPos (x: number, y: number, z: number): void {
+    if (x < -180) {
+      x = -180
+    } else if (x > 180) {
+      x = 180
+    }
+    if (y < -90) {
+      y = -90
+    } else if (y > 90) {
+      y = 90
+    }
+    super.setPos(x, y, z)
   }
 }

@@ -176,7 +176,7 @@ export default class TileLayer extends Layer<TileElement> {
     // gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, matrix.perspective(0, gl.canvas.width, gl.canvas.height, 0, -10, 10))
     // gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, matrix.perspective(0, 1000, 1000, 0, -10, 10))
     // gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, matrix.perspective(0, 1000, 1000, 0, -10, 10))
-    // gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, matrix.perspective(this.viewport.viewRight, this.viewport.viewLeft, this.viewport.viewTop, this.viewport.viewBottom, -10, 10))
+    // gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, matrix.perspective(viewRight, viewLeft, viewTop, viewBottom, -10, 10))
     // gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, matrix.perspectiveV2(this.x, this.y, this.z, gl.canvas.width / gl.canvas.height))
     gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, new Float32Array([
       1, 0, 0, 0,

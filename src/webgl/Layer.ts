@@ -5,10 +5,6 @@ export default abstract class Layer<ChildType extends Element> extends Element {
   viewport: Viewport
   childs: ChildType[]
 
-  x = 0
-  y = 0
-  z = 0
-
   constructor (viewport: Viewport) {
     super()
     this.viewport = viewport

@@ -11,10 +11,17 @@ export default abstract class Viewport {
   y = 0
   z = 0
 
-  viewLeft = -1
-  viewRight = 1
-  viewTop = -1
-  viewBottom = 1
+  public setPos (x: number, y: number, z: number): void {
+    const gl = this.gl
+    this.x = x
+    this.y = y
+    this.z = z
+    this.viewMatrix = matrix.perspectiveV2(this.x, this.y, this.z, gl.canvas.width / gl.canvas.height)
+    for (const layer of this.layers) {
+      layer.setPos(this.x, this.y, this.z)
+    }
+  }
+
   viewMatrix?: Float32Array
 
   /**
@@ -40,22 +47,15 @@ export default abstract class Viewport {
     this.resizeObserver.observe(this.canvas)
   }
 
-  setViewport (left: number, right: number, top: number, bottom: number) {
-    this.viewLeft = left
-    this.viewRight = right
-    this.viewTop = top
-    this.viewBottom = bottom
-    this.updateViewJob = true
-  }
-
+  /**
+   * Обновить размеры холста и матрицу проэкции
+   */
   protected updateView () {
     const gl = this.gl
     const canvas = this.canvas
     const bbox = canvas.getBoundingClientRect()
     this.canvas.width = bbox.width * window.devicePixelRatio
     this.canvas.height = bbox.height * window.devicePixelRatio
-    // this.viewLeft = -180 * canvas.width / canvas.height
-    // this.viewRight = 180 * canvas.width / canvas.height
     gl.viewport(0, 0, this.canvas.width, this.canvas.height)
     this.viewMatrix = matrix.perspectiveV2(this.x, this.y, this.z, gl.canvas.width / gl.canvas.height)
     for (const layer of this.layers) {

@@ -58,13 +58,8 @@ export default class InteractiveViewport extends Viewport {
   }
 
   wheel (event: WheelEvent) {
-    this.z -= event.deltaY / 1000
-    // console.log(this.z)
-    const gl = this.gl
-    this.viewMatrix = matrix.perspectiveV2(this.x, this.y, this.z, gl.canvas.width / gl.canvas.height)
-    for (const layer of this.layers) {
-      layer.setPos(this.x, this.y, this.z)
-    }
+    const z = this.z - event.deltaY / 1000
+    this.setPos(this.x, this.y, z)
   }
 
   touchstart (event: TouchEvent) {
@@ -154,13 +149,8 @@ export default class InteractiveViewport extends Viewport {
     } = this.dragData
     const x1 = 1 - (x - bbox.left) / bbox.width
     const y1 = 1 - (y - bbox.top) / bbox.height
-    this.x = localX + left - (left - right) * x1 - viewX
-    this.y = localY + top - (top - bottom) * y1 - viewY
-    const gl = this.gl
-    this.viewMatrix = matrix.perspectiveV2(this.x, this.y, this.z, gl.canvas.width / gl.canvas.height)
-
-    for (const layer of this.layers) {
-      layer.setPos(this.x, this.y, this.z)
-    }
+    const layerX = localX + left - (left - right) * x1 - viewX
+    const layerY = localY + top - (top - bottom) * y1 - viewY
+    this.setPos(layerX, layerY, this.z)
   }
 }
