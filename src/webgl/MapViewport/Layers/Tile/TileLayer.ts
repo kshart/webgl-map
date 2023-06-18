@@ -153,10 +153,10 @@ export default class TileLayer extends Layer<TileElement> {
     }
     toLoad.sort((a, b) => a.length - b.length)
 
-    this.removeChilds(this.childs.filter(ch => !loadTileUrls.has(ch.url)))
+    // this.removeChilds(this.childs.filter(ch => !loadTileUrls.has(ch.url)))
 
     const newChilds = []
-    for (const { x, y, url } of toLoad.slice(0, 32).filter(conf => !this.childs.find(ch => ch.url === conf.url))) {
+    for (const { x, y, url } of toLoad.slice(0, 256).filter(conf => !this.childs.find(ch => ch.url === conf.url))) {
       newChilds.push(new TileElement(this, url, (x / tileCount) * 360 - 180, (y / tileCount) * -180 + 90))
     }
     this.addChilds(newChilds)
@@ -204,6 +204,12 @@ export default class TileLayer extends Layer<TileElement> {
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this.textureCoordsBuffer)
     gl.vertexAttribPointer(this.attribLocations.textureCoords, 2, gl.FLOAT, false, 0, 0)
+
+    // gl.blendFunc(gl.SRC_COLOR, gl.DST_COLOR)
+    gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
+    // gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
+    // gl.colorMask(false, false, false, true)
+    // gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
 
     for (const child of this.childs) {
       child.render()

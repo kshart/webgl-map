@@ -1,6 +1,9 @@
 import Element from '@/webgl/Element'
 import TileLayer from './TileLayer'
 
+// Нужно скоректировать
+const maxLayerWeight = Math.sqrt(360 * 360 + 90 * 90)
+
 /**
  * Тайтл
  */
@@ -47,6 +50,18 @@ export default class TileElement extends Element {
   }
 
   /**
+   * Element Cleaner
+   * Вес элемента, чем меньше тем выше вероятность у элемента остатся на слое
+   */
+  ecGetWeight (): number {
+    let zDiff = this.layer.z - this.layer.tileZ
+    if (zDiff < 1) {
+      zDiff = 1
+    }
+    return zDiff * maxLayerWeight + Math.sqrt((this.x - this.layer.x) ** 2 + (this.y - this.layer.y) ** 2)
+  }
+
+  /**
    * @override
    */
   unmount () {
@@ -67,7 +82,7 @@ export default class TileElement extends Element {
       throw new Error('Fatal Error')
     }
     if (this.loaded && this.opacity < 1) {
-      this.opacity = this.opacity + 0.2
+      this.opacity = this.opacity + 0.05
     }
     const gl = this.layer.viewport.gl
     gl.uniform2f(this.layer.uniforms.offsetTile, this.x, this.y)

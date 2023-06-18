@@ -43,6 +43,9 @@ export default abstract class Viewport {
   }
 
   destroy (): void {
+    for (const layer of this.layers) {
+      layer.unmount()
+    }
     this.renderDone = true
     this.resizeObserver.observe(this.canvas)
   }

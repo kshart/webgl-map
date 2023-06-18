@@ -23,7 +23,7 @@ export default abstract class Layer<ChildType extends Element> extends Element {
     }
   }
 
-  loadShader (type: number, source: string): WebGLShader {
+  protected loadShader (type: number, source: string): WebGLShader {
     const gl = this.viewport.gl
     const shader = gl.createShader(type)
     if (!shader) {
